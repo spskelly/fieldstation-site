@@ -40,9 +40,18 @@
   const BADGE_HELP = {
     probable: "Likely this species, but the classifier was not sure enough to say so plainly.",
     possible: "Several candidates; these are the top guesses, best first.",
-    unverified: "An unusual species for this area that no second line of evidence has confirmed yet.",
+    unverified: "No second line of evidence yet: an unusual species seen without corroboration, or a species heard only a few times. Treat it as a maybe.",
   };
   const badge = (text) => el("span", { class: `badge ${text}`, title: BADGE_HELP[text] || null }, text);
+  // Species status comes from index.json (species_status in site.py):
+  // "confirmed" or "unverified", per species over all time. An unverified
+  // species is named but not linked as if it were an identification, and
+  // wears the badge wherever it appears (grid, feed, chips, its own page).
+  let unverifiedSlugs = new Set();
+  const noteStatus = (index) => { unverifiedSlugs = new Set((index.species || []).filter((s) => s.status === "unverified").map((s) => s.slug)); };
+  const speciesName = (slug, name) => unverifiedSlugs.has(slug)
+    ? el("span", { class: "ident" }, el("span", null, name), " ", badge("unverified"))
+    : speciesLink(slug, name);
 
   // Identification labels come from fieldstation/publish/site.py
   // (tier_label and _identification_display). The prose form is the data;
@@ -116,7 +125,7 @@
       app.append(el("div", { class: "toolbar" }, el("h1", null, day.heading), dayNav(index, day.date)));
       const c = day.counts;
       app.append(el("div", { class: "stats" },
-        stat(c.species, "species"), stat(c.visits, "feeder visits"), stat(c.seen, "seen on camera"), stat(c.heard, "heard")));
+        stat(c.species, "species"), stat(c.visits, "feeder visits"), stat(c.seen, "species seen"), stat(c.heard, "species heard")));
     }
 
     const cond = [];
@@ -155,14 +164,17 @@
       const list = el("ul", { class: "days" });
       for (const d of index.recent_days)
         list.append(el("li", { class: d.date === day.date ? "current" : null }, dayLink(d.date),
-          el("span", { class: "detail" }, `${d.species} species · ${d.visits} visits · ${d.heard} heard`)));
+          el("span", { class: "detail" }, `${d.species} species · ${d.visits} visits · ${d.heard} audio detections`)));
       app.append(el("section", { class: "card" }, el("h2", null, "Recent days"), list));
     }
 
     if (index.species && index.species.length) {
       const chips = el("ul", { class: "chips" });
-      for (const s of index.species) chips.append(el("li", null, speciesLink(s.slug, s.common)));
-      app.append(el("section", { class: "card" }, el("h2", null, "Species recorded at this station"), chips));
+      const confirmed = index.species.filter((s) => s.status !== "unverified");
+      for (const s of confirmed) chips.append(el("li", null, speciesLink(s.slug, s.common)));
+      const rest = index.species.length - confirmed.length;
+      if (rest) chips.append(el("li", null, el("a", { class: "muted", href: `${root}species/#unverified` }, `${rest} unverified ›`)));
+      app.append(el("section", { class: "card" }, el("h2", null, "Species confirmed at this station"), chips));
     }
   }
 
@@ -174,12 +186,16 @@
     const thead = el("thead", null);
     if (opts.sunrise && opts.sunset) {
       const rise = parseInt(opts.sunrise.slice(0, 2), 10), set = parseInt(opts.sunset.slice(0, 2), 10);
-      const strip = el("tr", { class: "strip" }, el("th", { class: "lbl" }, "Daylight"), el("th", null));
+      const strip = el("tr", { class: "strip" }, el("th", { class: "lbl" }, "Daylight"), el("th", null), el("th", null));
       for (let h = 0; h < 24; h++)
         strip.append(el("td", null, el("span", { class: h >= rise && h <= set ? "light day" : "light night" })));
       thead.append(strip);
     }
-    const head = el("tr", null, el("th", null, opts.header === undefined ? "Species" : opts.header), el("th", { class: "num" }, "Total"));
+    // seen and heard are separate columns: camera visits and calls are not
+    // comparable counts, so they never share a printed number (the shaded
+    // cell sums them for shape; its tooltip keeps them apart)
+    const head = el("tr", null, el("th", null, opts.header === undefined ? "Species" : opts.header),
+      el("th", { class: "num" }, "Seen"), el("th", { class: "num" }, "Heard"));
     for (let h = 0; h < 24; h++) head.append(el("th", { class: "hour" }, String(h)));
     thead.append(head);
     const table = el("table", { class: "grid" }, thead);
@@ -190,11 +206,12 @@
       const label = el("td", { class: "species-cell" });
       if (r.image) label.append(picture(r.image, r.common));
       else label.append(el("span", { class: "thumb-empty", "aria-hidden": "true" }, "♪"));
-      label.append(speciesLink(r.slug, r.common));
-      const tr = el("tr", null, label, el("td", { class: "num" }, r.total));
+      label.append(speciesName(r.slug, r.common));
+      const tr = el("tr", null, label, el("td", { class: "num" }, r.seen || ""), el("td", { class: "num" }, r.heard || ""));
       r.hours.forEach((n, h) => {
         const level = n === 0 ? 0 : Math.min(5, Math.ceil((n / max) * 5));
-        tr.append(el("td", { class: `cell l${level}`, title: `${n} at ${h}:00` }, n || ""));
+        const split = r.hours_seen ? `${r.hours_seen[h]} seen, ${r.hours_heard[h]} heard at ${h}:00` : `${n} at ${h}:00`;
+        tr.append(el("td", { class: `cell l${level}`, title: split }, n || ""));
       });
       tbody.append(tr);
     }
@@ -227,7 +244,7 @@
       else li.append(el("span", { class: "thumb", "aria-hidden": "true" }, g.kind === "audio" ? "♪" : ""));
       li.append(el("span", { class: "time" }, g.count > 1 ? `${g.until}–${g.time}` : g.time));
       if (g.kind === "audio") {
-        const name = el("span", { class: "ident" }, speciesLink(g.slug, g.common));
+        const name = el("span", { class: "ident" }, speciesName(g.slug, g.common));
         if (g.count > 1) name.append(" ", el("span", { class: "count" }, `×${g.count}`));
         li.append(name, el("span", { class: "detail" },
           g.count > 1 ? `heard · up to ${Math.round(g.best * 100)}%` : `heard · ${Math.round(g.confidence * 100)}%`));
@@ -275,7 +292,13 @@
   // ---- species page ----------------------------------------------------
   function renderSpecies(sp) {
     clear();
-    app.append(el("h1", null, sp.common), el("p", { class: "scientific" }, sp.scientific));
+    const h1 = el("h1", null, sp.common);
+    if (sp.status === "unverified") h1.append(" ", badge("unverified"));
+    app.append(h1, el("p", { class: "scientific" }, sp.scientific));
+    if (sp.status === "unverified") app.append(el("p", { class: "filter-note" },
+      "The station cannot stand behind this species yet: it was heard only a few times, or seen without a second line of evidence. ",
+      "Records are kept so the log is complete, not because the identification is trusted. ",
+      el("a", { href: `${root}about/#methods` }, "How the station decides"), "."));
     const hero = el("section", { class: "card hero" });
     if (sp.best_image) hero.append(picture(sp.best_image, sp.common));
     else hero.append(el("div", { class: "nophoto" }, "Heard, not yet photographed"));
@@ -285,7 +308,7 @@
       stat(sp.last_date ? longDate(sp.last_date) : "–", "last record", "date")));
     app.append(hero);
     app.append(el("section", { class: "card" }, el("h2", null, "Time of day"),
-      gridTable([{ slug: null, common: "All days", hours: sp.hourly_profile, total: sp.hourly_profile.reduce((a, b) => a + b, 0) }], { header: "" })));
+      gridTable([{ slug: null, common: "All days", hours: sp.hourly_profile, seen: sp.total_seen, heard: sp.total_heard }], { header: "" })));
     app.append(el("section", { class: "card" }, el("h2", null, "Every record"), recordList(sp)));
   }
 
@@ -334,23 +357,38 @@
       || (b.total_seen + b.total_heard) - (a.total_seen + a.total_heard)
       || a.common.localeCompare(b.common));
     document.title = `Species - ${index.station}`;
+    const confirmed = species.filter((s) => s.status !== "unverified");
+    const unverified = species.filter((s) => s.status === "unverified");
     app.append(el("h1", null, "Species"),
-      el("p", { class: "meta" }, `${species.length} species recorded at this station, most recent first.`));
+      el("p", { class: "meta" }, `${confirmed.length} species confirmed at this station, most recent first.`));
     if (!species.length) { app.append(el("p", { class: "empty" }, "Nothing recorded yet.")); return; }
-    const grid = el("ul", { class: "species-grid" });
-    for (const s of species) {
-      const card = el("li", { class: "card" });
-      const link = el("a", { href: `${root}species/${s.slug}/`, "aria-label": s.common });
-      if (s.best_image) link.append(img(s.best_image, s.common));
-      else link.append(el("span", { class: "nophoto", "aria-hidden": "true" }, "♪"));
-      card.append(link,
-        el("p", { class: "name" }, el("a", { href: `${root}species/${s.slug}/` }, s.common)),
-        el("p", { class: "scientific" }, s.scientific),
-        el("p", { class: "detail" }, `${s.total_seen} seen · ${s.total_heard} heard`),
-        el("p", { class: "detail" }, s.last_date ? `last ${longDate(s.last_date)}` : ""));
-      grid.append(card);
+    const cards = (list) => {
+      const grid = el("ul", { class: "species-grid" });
+      for (const s of list) {
+        const card = el("li", { class: "card" });
+        const link = el("a", { href: `${root}species/${s.slug}/`, "aria-label": s.common });
+        if (s.best_image) link.append(img(s.best_image, s.common));
+        else link.append(el("span", { class: "nophoto", "aria-hidden": "true" }, "♪"));
+        const name = el("p", { class: "name" }, el("a", { href: `${root}species/${s.slug}/` }, s.common));
+        if (s.status === "unverified") name.append(" ", badge("unverified"));
+        card.append(link, name,
+          el("p", { class: "scientific" }, s.scientific),
+          el("p", { class: "detail" }, `${s.total_seen} seen · ${s.total_heard} heard`),
+          el("p", { class: "detail" }, s.last_date ? `last ${longDate(s.last_date)}` : ""));
+        grid.append(card);
+      }
+      return grid;
+    };
+    app.append(cards(confirmed));
+    if (unverified.length) {
+      // raw classifier output, kept visible and framed as such rather than deleted
+      app.append(el("h2", { id: "unverified", class: "section" }, `Unverified detections (${unverified.length})`),
+        el("p", { class: "meta" },
+          "Classifier output the station cannot stand behind yet: a species heard only a few times, or an unusual species seen without a second line of evidence. ",
+          "Most single detections of an out-of-place species are errors. They are listed so the record is complete, not because the station believes them. ",
+          el("a", { href: `${root}about/#methods` }, "How the station decides"), "."),
+        cards(unverified));
     }
-    app.append(grid);
   }
 
   // ---- narrative editions and the front-page feed ----------------------
@@ -381,7 +419,7 @@
       const c = post.counts;
       card.append(el("p", { class: "post-foot" },
         el("a", { href: `${dayHref(post.date)}#${editionId(e)}` }, "Read the full edition"),
-        ` · ${c.species} species · ${c.visits} feeder visits · ${c.heard} heard`));
+        ` · ${c.species} species · ${c.visits} feeder visits · ${c.heard} audio detections so far`));
       return card;
     }
     card.append(el("p", null, paras[0] || ""));
@@ -413,7 +451,11 @@
     pager.append(el("span", { class: "week" }, `Week ${week.slice(6)}, ${week.slice(0, 4)}`));
     pager.append(i < weeks.length - 1 ? el("a", { href: weekHref(weeks[i + 1]) }, "Older ›") : el("span", null, ""));
     app.append(el("div", { class: "toolbar" }, el("h1", null, "Field log"), pager));
-    app.append(editionGrid(feed.posts.map((post) => editionCard(post, post))));
+    app.append(editionGrid(feed.posts.map((post, i) => {
+      const card = editionCard(post, post);
+      if (i === 0 || post.date !== feed.posts[i - 1].date) card.classList.add("day-start");
+      return card;
+    })));
     app.append(pager.cloneNode(true));
     document.title = `Field log - ${index.station}`;
   }
@@ -425,7 +467,10 @@
         await renderFeed(await fetchJson("data/index.json"));
       } else if (body.dataset.page === "day") {
         const index = await fetchJson("data/index.json");
-        const date = new URLSearchParams(location.search).get("date") || index.latest_date;
+        noteStatus(index);
+        // today exists from the first fast tick with nothing in it yet; land on the latest day with data
+        const withData = (index.recent_days || []).find((d) => d.visits || d.heard);
+        const date = new URLSearchParams(location.search).get("date") || (withData && withData.date) || index.latest_date;
         if (!date) { clear(); app.append(el("p", { class: "empty" }, "No data yet.")); return; }
         await loadDay(index, date, false);
       } else if (body.dataset.page === "species") {

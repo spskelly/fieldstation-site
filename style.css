@@ -52,6 +52,7 @@ h2 { font-size: .85rem; margin: 0 0 .8rem; color: var(--muted); text-transform: 
 .narrative .post-foot { color: var(--muted); font-size: .9rem; margin: .4rem 0 0; }
 .posts { display: grid; grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr)); gap: 1rem; margin-bottom: 1rem; }
 .posts .card { margin: 0; }
+.posts .day-start { grid-column: 1; } /* a new day starts a new row, so days read as units */
 .narrative details { margin-top: .6rem; }
 .narrative summary { cursor: pointer; color: var(--accent); font-size: .95rem; margin-bottom: .6rem; }
 .narrative details[open] summary { color: var(--muted); }
@@ -129,6 +130,8 @@ ul.days li:first-child { border-top: 0; }
 ul.chips { display: flex; flex-wrap: wrap; gap: .4rem; }
 ul.chips a { display: inline-block; padding: .2rem .7rem; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; color: var(--fg); background: var(--soft); font-size: .9rem; }
 ul.chips a:hover { border-color: var(--accent); color: var(--accent); }
+ul.chips a.muted { color: var(--muted); background: none; border-style: dashed; }
+h2.section { margin-top: 1.6rem; }
 .hero { display: grid; grid-template-columns: minmax(200px, 360px) 1fr; gap: 1.2rem; align-items: start; }
 .hero img, .hero .nophoto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; }
 .hero .nophoto { display: flex; align-items: center; justify-content: center; background: var(--soft); color: var(--muted); }

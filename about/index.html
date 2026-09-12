@@ -38,9 +38,47 @@ carries its identification tier, and the daily narrative is written from the cou
 <li><strong>No badge</strong>: the station is confident of the species.</li>
 <li><strong>Probable</strong>: likely, but the classifier was not sure enough to say so plainly.</li>
 <li><strong>Possible</strong>: several candidates; the names listed are the top guesses, best first.</li>
-<li><strong>Unverified</strong>: an unusual species for this area that no second line of evidence has
-confirmed yet. Treat it as a maybe.</li>
+<li><strong>Unverified</strong>: no second line of evidence yet. Either an unusual species for this
+area seen without corroboration, or a species the microphone picked up only a few times. Treat it as
+a maybe; most single detections of an out-of-place species are classifier errors.</li>
 </ul>
+
+<h2 id="methods">How the station decides</h2>
+<p>Two separate systems, with different ways of being wrong. A microphone runs an acoustic
+classifier (BirdNET) over three-second windows of sound. A camera runs an object detector, then
+an image classifier on crops of whatever it tracked, and a vision-language model describes the
+best crops. None of them knows what the others found, so "seen" and "heard" are not comparable
+counts: a wren calling from the hedge all morning is heard dozens of times and seen never; a
+titmouse that visits the feeder in silence is the reverse. A species with two hundred records
+heard and one seen tells you about the sensors, not the bird.</p>
+
+<p>The microphone first recorded a bird on September 7, 2026; the camera first recorded a visit on September 9, 2026. Days before the camera's first
+visit are audio only, and a jump in visits on that day is the hardware arriving, not the birds.</p>
+
+<p><strong>Known failure modes.</strong> The acoustic classifier mistakes distant traffic, squirrels,
+insects and overlapping song for birds, and one loud call can score as two or three detections in
+the same minute. Its confidence is not calibrated across species: a wrong shorebird has scored 0.96
+here while a real Blue Jay averages about 0.6, so this site does not rank claims by confidence.
+Camera crops are small, often little more than a hundred pixels across, well below what
+fine-grained bird classifiers were trained on, so the image classifier confuses similar shapes
+and now and then names a species that has never been in this county. Rare species with a single
+detection are usually errors.</p>
+
+<p><strong>What makes a species count.</strong> A species is <em>confirmed</em> here when a visual record
+passes the publication check (an identification that is either expected for this area or backed
+by a second line of evidence: another confident visit, an overlapping call, the vision model
+naming the same bird from its field marks, or a person's review), or when the microphone has
+recorded it at least 5 times across at least 2 separate hours.
+Everything else is <em>unverified</em>: still listed, still in the raw detection totals, and
+framed as the classifier's output rather than the station's claim. A highlight's caption is shown
+only when the vision model named the same species the classifier did. Verify and reject decisions
+made by a person apply retroactively: a rejected visit leaves its day and the day's write-ups are
+regenerated.</p>
+
+<p><strong>Reading the counts.</strong> A day's "species" figure counts seen and heard species once
+each. "Feeder visits" counts camera visits after consecutive detections of one bird are grouped.
+"Audio detections" counts three-second classifier hits, so one bird calling for a minute produces
+many. The hour grid keeps seen and heard in separate columns for the same reason.</p>
 </section>
 
 </main>
