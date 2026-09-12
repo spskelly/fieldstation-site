@@ -14,7 +14,7 @@ what it decided to publish.
 
 | Path | What it is |
 | --- | --- |
-| `index.html`, `day/`, `species/`, `about/` | Static shells. Each one loads `app.js`, which reads the data files and renders the page in the browser. |
+| `index.html`, `log/`, `species/`, `about/` | Static shells. Each one loads `app.js`, which reads the data files and renders the page in the browser. The home page (`index.html`) is the current day; `log/` is the narrative feed. |
 | `app.js`, `style.css` | The whole front end. No build step, no framework. |
 | `data/index.json` | Station name, timezone, first and latest dates, and one summary row per species (status, totals seen and heard, first and last dates, best image). |
 | `data/days/YYYY-MM-DD.json` | One file per local day: sunrise and sunset, weather, counts, the species-by-hour grid, the timeline of detections, the highlights, and the day's narrative editions. |

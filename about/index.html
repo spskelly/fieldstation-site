@@ -11,8 +11,8 @@
 <header>
 <p class="site-name"><a href="../">backyard-01</a></p>
 <nav>
-<a href="../">Log</a>
-<a href="../day/">Days</a>
+<a href="../">Days</a>
+<a href="../log/">Log</a>
 <a href="../species/">Species</a>
 <a href="../about/">About</a>
 </nav>
@@ -42,6 +42,23 @@ carries its identification tier, and the daily narrative is written from the cou
 area seen without corroboration, or a species the microphone picked up only a few times. Treat it as
 a maybe; most single detections of an out-of-place species are classifier errors.</li>
 </ul>
+
+<h2>The hardware and software</h2>
+<p>Everything on this page comes from one machine at the station; nothing is uploaded to a cloud
+service or a third-party API at any stage. A single TP-Link Tapo C120 camera, about six feet from
+the feeder, supplies both the video and, from its built-in microphone, the audio: one device, no
+second camera.</p>
+
+<p>Frigate watches the video stream and tracks birds with an exported D-FINE object detector
+running on an Nvidia RTX 3090, producing the crops and clips the rest of the pipeline works from.
+BioCLIP 2, a fine-grained species classifier, and Frigate's own built-in classifier each get a
+vote on a crop, checked against a regional species list; a person's review can override either.
+BirdNET-Go listens to the audio independently and never sees the video. A local vision-language
+model, qwen3.8:27b served by Ollama, looks at the best crop of a visit to describe it and
+help settle disagreements between the other two, and separately writes the narrative editions on
+the Log page from the day's computed counts and timeline, nothing else. The database, the review
+dashboard, and this public site are all built by the same private project (Fieldstation) running
+on that same machine.</p>
 
 <h2 id="methods">How the station decides</h2>
 <p>Two separate systems, with different ways of being wrong. A microphone runs an acoustic

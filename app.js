@@ -32,7 +32,7 @@
   // ?species=<slug> on the day page narrows the grid and feed to one species
   // (the Days list on a species page links there).
   const dayQuery = (iso, slug) => `?date=${iso}${slug ? `&species=${encodeURIComponent(slug)}` : ""}`;
-  const dayHref = (iso, slug) => `${root}day/${dayQuery(iso, slug)}`;
+  const dayHref = (iso, slug) => `${root}${dayQuery(iso, slug)}`;
   const dayLink = (iso, text, slug) => el("a", { href: dayHref(iso, slug) }, text || longDate(iso));
   const speciesParam = () => new URLSearchParams(location.search).get("species") || null;
 
