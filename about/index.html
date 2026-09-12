@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About - backyard-01</title>
+<link rel="stylesheet" href="../style.css">
+<script src="../app.js" defer></script>
+</head>
+<body data-page="about" data-slug="" data-root="../">
+<header>
+<p class="site-name"><a href="../">backyard-01</a></p>
+<nav>
+<a href="../">Log</a>
+<a href="../day/">Days</a>
+<a href="../species/">Species</a>
+<a href="../about/">About</a>
+</nav>
+</header>
+<main id="app">
+
+<h1>About this station</h1>
+<section class="card prose">
+<p>This is an automated backyard bird feeder station. A camera and a microphone watch a
+feeder; the video and audio are processed locally, and what you see here is what the
+station made of it: which birds came, when, and how sure it is. Every species claim
+carries its identification tier, and the daily narrative is written from the counts alone.</p>
+
+<p>Location: the published location is randomized within 1 km of the station.</p>
+
+<h2>What is never published</h2>
+<ul>
+<li>Only target classes (birds, by default) are tracked; people, vehicles, and faces are never stored.</li><li>Raw media is a short ring buffer, and only crops of tracked birds ever leave it.</li><li>No individual identity is tracked for non-target subjects, ever.</li><li>Nothing here describes when this household is occupied: the published location is randomized within 1 km of the station, and no uptime, health, or camera schedule is published. Times on this site are when a bird was seen or heard.</li>
+</ul>
+
+<h2>Reading the labels</h2>
+<ul>
+<li><strong>No badge</strong>: the station is confident of the species.</li>
+<li><strong>Probable</strong>: likely, but the classifier was not sure enough to say so plainly.</li>
+<li><strong>Possible</strong>: several candidates; the names listed are the top guesses, best first.</li>
+<li><strong>Unverified</strong>: an unusual species for this area that no second line of evidence has
+confirmed yet. Treat it as a maybe.</li>
+</ul>
+</section>
+
+</main>
+<footer>
+<p>A backyard ecology station. See <a href="../about/">About</a> for what is, and is not, published.</p>
+</footer>
+</body>
+</html>
