@@ -157,7 +157,7 @@
     }
 
     app.append(el("section", { class: "card" }, el("h2", null, only ? "By hour" : "Species by hour"),
-      gridTable(grid, { sunrise: day.sunrise, sunset: day.sunset })));
+      gridTable(grid, { sunrise: day.sunrise, sunset: day.sunset, weather: day.weather && day.weather.hourly })));
     app.append(el("section", { class: "card" }, el("h2", null, "Detections"), feedList(feed)));
 
     if (index.recent_days && index.recent_days.length) {
@@ -178,7 +178,12 @@
     }
   }
 
+  // Same categories as _weather_icon in fieldstation/analytics/daily.py.
+  const WEATHER_ICON = { clear: "☀️", partly: "⛅", cloudy: "☁️", rain: "🌧️", snow: "❄️" };
+  const WEATHER_LABEL = { clear: "clear", partly: "partly cloudy", cloudy: "cloudy", rain: "rain", snow: "snow" };
+
   // opts.sunrise/sunset ("HH:MM") add a daylight strip above the hours;
+  // opts.weather (day.weather.hourly, 24 entries) adds a weather-icon strip;
   // opts.header names the first column (default "Species").
   function gridTable(rows, opts) {
     opts = opts || {};
@@ -189,6 +194,14 @@
       const strip = el("tr", { class: "strip" }, el("th", { class: "lbl" }, "Daylight"), el("th", null), el("th", null));
       for (let h = 0; h < 24; h++)
         strip.append(el("td", null, el("span", { class: h >= rise && h <= set ? "light day" : "light night" })));
+      thead.append(strip);
+    }
+    if (opts.weather) {
+      const strip = el("tr", { class: "strip" }, el("th", { class: "lbl" }, "Weather"), el("th", null), el("th", null));
+      for (let h = 0; h < 24; h++) {
+        const cat = opts.weather[h];
+        strip.append(el("td", { class: "weather-cell", title: cat ? WEATHER_LABEL[cat] : "" }, cat ? WEATHER_ICON[cat] || "" : ""));
+      }
       thead.append(strip);
     }
     // seen and heard are separate columns: camera visits and calls are not

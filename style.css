@@ -76,6 +76,7 @@ table.grid tr.strip th, table.grid tr.strip td { padding: 0 0 .15rem; border: 0;
 table.grid tr.strip th.lbl { font-size: .75rem; text-align: right; }
 table.grid .light { display: block; height: .4rem; border-radius: 2px; margin: 0 1px; background: var(--border); }
 table.grid .light.day { background: #f0cf5a; }
+table.grid td.weather-cell { text-align: center; font-size: .85rem; line-height: 1; }
 td.cell { height: 1.8rem; color: transparent; }
 td.cell:hover { color: var(--fg); }
 td.l1 { background: var(--l1); } td.l2 { background: var(--l2); } td.l3 { background: var(--l3); }
