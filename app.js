@@ -139,7 +139,9 @@
     if (cond.length) app.append(el("p", { class: "meta" }, cond.join(" · ")));
 
     if (day.editions && day.editions.length && !only) {
-      app.append(editionGrid(day.editions.map((e) => editionCard(e, null))));
+      // the recap (written the next morning) leads; the editions follow in writing order
+      const ordered = [...day.editions].sort((a, b) => (b.edition === "recap") - (a.edition === "recap"));
+      app.append(editionGrid(ordered.map((e) => editionCard(e, null))));
       const target = location.hash && document.getElementById(location.hash.slice(1));
       if (target) target.scrollIntoView();
     }
@@ -418,27 +420,32 @@
   // One edition as a card showing its blurb. On the feed (`post` given) the
   // card links to the full edition on the day page; on the day page the rest
   // of the text sits in a native expander, opened when the link lands on it.
+  // The recap is written the morning after the day it covers, so its time
+  // is labelled as that, and its counts are the whole day's.
   function editionCard(e, post) {
+    const recap = e.edition === "recap";
+    const noun = recap ? "recap" : "edition";
     const head = el("div", { class: "edition-head" });
     if (post) head.append(el("h2", null, dayLink(post.date, post.heading)));
     head.append(el("p", { class: "edition-meta" },
-      el("span", { class: "edition-name" }, `${cap(e.edition)} edition`),
+      el("span", { class: "edition-name" }, recap ? "Recap" : `${cap(e.edition)} edition`),
       e.byline ? el("span", { class: "byline" }, ` · ${e.byline}`) : "",
-      el("span", { class: "time" }, ` · ${e.time}`)));
-    const card = el("article", { class: "card narrative", id: post ? null : editionId(e) }, head);
+      el("span", { class: "time" }, recap ? ` · next morning ${e.time}` : ` · ${e.time}`)));
+    // full width only on the day page; the Log keeps its two columns of days
+    const card = el("article", { class: recap && !post ? "card narrative recap" : "card narrative", id: post ? null : editionId(e) }, head);
     const paras = paragraphs(e.text);
     if (post) {
       card.append(el("p", null, blurb(e.text)));
       const c = post.counts;
       card.append(el("p", { class: "post-foot" },
-        el("a", { href: `${dayHref(post.date)}#${editionId(e)}` }, "Read the full edition"),
-        ` · ${c.species} species · ${c.visits} feeder visits · ${c.heard} audio detections so far`));
+        el("a", { href: `${dayHref(post.date)}#${editionId(e)}` }, `Read the full ${noun}`),
+        ` · ${c.species} species · ${c.visits} feeder visits · ${c.heard} audio detections${recap ? "" : " so far"}`));
       return card;
     }
     card.append(el("p", null, paras[0] || ""));
     if (paras.length > 1) {
       const rest = el("details", { open: location.hash === `#${editionId(e)}` ? "" : null },
-        el("summary", null, "Read the full edition"));
+        el("summary", null, `Read the full ${noun}`));
       for (const para of paras.slice(1)) rest.append(el("p", null, para));
       card.append(rest);
     }
@@ -464,11 +471,8 @@
     pager.append(el("span", { class: "week" }, `Week ${week.slice(6)}, ${week.slice(0, 4)}`));
     pager.append(i < weeks.length - 1 ? el("a", { href: weekHref(weeks[i + 1]) }, "Older ›") : el("span", null, ""));
     app.append(el("div", { class: "toolbar" }, el("h1", null, "Field log"), pager));
-    app.append(editionGrid(feed.posts.map((post, i) => {
-      const card = editionCard(post, post);
-      if (i === 0 || post.date !== feed.posts[i - 1].date) card.classList.add("day-start");
-      return card;
-    })));
+    // one post per day (the recap, or the day's latest edition until it exists)
+    app.append(editionGrid(feed.posts.map((post) => editionCard(post, post))));
     app.append(pager.cloneNode(true));
     document.title = `Field log - ${index.station}`;
   }

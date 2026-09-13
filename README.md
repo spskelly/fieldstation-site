@@ -17,16 +17,16 @@ what it decided to publish.
 | `index.html`, `log/`, `species/`, `about/` | Static shells. Each one loads `app.js`, which reads the data files and renders the page in the browser. The home page (`index.html`) is the current day; `log/` is the narrative feed. |
 | `app.js`, `style.css` | The whole front end. No build step, no framework. |
 | `data/index.json` | Station name, timezone, first and latest dates, and one summary row per species (status, totals seen and heard, first and last dates, best image). |
-| `data/days/YYYY-MM-DD.json` | One file per local day: sunrise and sunset, weather, counts, the species-by-hour grid, the timeline of detections, the highlights, and the day's narrative editions. |
+| `data/days/YYYY-MM-DD.json` | One file per local day: sunrise and sunset, weather, counts, the species-by-hour grid, the timeline of detections, the highlights, the day's narrative editions, and the recap written the next morning. |
 | `data/species/<slug>.json` | One file per species: status, totals, hourly profile, per-day counts, and every record with its time, kind (seen or heard) and confidence. |
-| `data/feed/YYYY-Www.json` | One file per ISO week: the narrative editions in reverse order, which the front page reads. |
+| `data/feed/YYYY-Www.json` | One file per ISO week: one post per day, newest first (the day's recap, or its latest edition until the recap is written), which the Log page reads. |
 | `media/YYYY-MM-DD/<id>.jpg` | Crops of birds the camera tracked, at most 1024 px on the long side. Only crops of target classes are ever published. |
 
 Day files are appended and never rewritten unless the station is asked to
 re-render that day, which happens when a person rejects or verifies a visit
 after the fact. The index, the species files and the feed are rebuilt from the
 day files on every publish. The station publishes today's day file every ten
-minutes when something changed, and a narrative edition a few times a day.
+minutes when something changed, a narrative edition a few times a day, and a recap of the day before shortly before sunrise.
 
 ## How to read it
 

@@ -52,7 +52,7 @@ h2 { font-size: .85rem; margin: 0 0 .8rem; color: var(--muted); text-transform: 
 .narrative .post-foot { color: var(--muted); font-size: .9rem; margin: .4rem 0 0; }
 .posts { display: grid; grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr)); gap: 1rem; margin-bottom: 1rem; }
 .posts .card { margin: 0; }
-.posts .day-start { grid-column: 1; } /* a new day starts a new row, so days read as units */
+.posts .recap { grid-column: 1 / -1; } /* the day page leads with the recap across the grid */
 .narrative details { margin-top: .6rem; }
 .narrative summary { cursor: pointer; color: var(--accent); font-size: .95rem; margin-bottom: .6rem; }
 .narrative details[open] summary { color: var(--muted); }
