@@ -139,7 +139,7 @@
     if (cond.length) app.append(el("p", { class: "meta" }, cond.join(" · ")));
 
     if (day.editions && day.editions.length && !only) {
-      // the recap (written the next morning) leads; the editions follow in writing order
+      // yesterday's recap (written this morning) leads; the day's editions follow in writing order
       const ordered = [...day.editions].sort((a, b) => (b.edition === "recap") - (a.edition === "recap"));
       app.append(editionGrid(ordered.map((e) => editionCard(e, null))));
       const target = location.hash && document.getElementById(location.hash.slice(1));
@@ -420,8 +420,9 @@
   // One edition as a card showing its blurb. On the feed (`post` given) the
   // card links to the full edition on the day page; on the day page the rest
   // of the text sits in a native expander, opened when the link lands on it.
-  // The recap is written the morning after the day it covers, so its time
-  // is labelled as that, and its counts are the whole day's.
+  // The recap is written the morning after the day it covers and reads on
+  // that morning's page (post.page_date); on the Log its time is labelled
+  // as the next morning, and its counts are the whole day's.
   function editionCard(e, post) {
     const recap = e.edition === "recap";
     const noun = recap ? "recap" : "edition";
@@ -430,7 +431,7 @@
     head.append(el("p", { class: "edition-meta" },
       el("span", { class: "edition-name" }, recap ? "Recap" : `${cap(e.edition)} edition`),
       e.byline ? el("span", { class: "byline" }, ` · ${e.byline}`) : "",
-      el("span", { class: "time" }, recap ? ` · next morning ${e.time}` : ` · ${e.time}`)));
+      el("span", { class: "time" }, recap && post ? ` · next morning ${e.time}` : ` · ${e.time}`)));
     // full width only on the day page; the Log keeps its two columns of days
     const card = el("article", { class: recap && !post ? "card narrative recap" : "card narrative", id: post ? null : editionId(e) }, head);
     const paras = paragraphs(e.text);
@@ -438,7 +439,7 @@
       card.append(el("p", null, blurb(e.text)));
       const c = post.counts;
       card.append(el("p", { class: "post-foot" },
-        el("a", { href: `${dayHref(post.date)}#${editionId(e)}` }, `Read the full ${noun}`),
+        el("a", { href: `${dayHref(post.page_date)}#${editionId(e)}` }, `Read the full ${noun}`),
         ` · ${c.species} species · ${c.visits} feeder visits · ${c.heard} audio detections${recap ? "" : " so far"}`));
       return card;
     }
