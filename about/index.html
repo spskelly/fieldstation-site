@@ -30,7 +30,7 @@ carries its identification tier, and the daily narrative is written from the cou
 
 <h2>What is never published</h2>
 <ul>
-<li>Only target classes (birds, by default) are tracked; people, vehicles, and faces are never stored.</li><li>Raw media is a short ring buffer, and only crops of tracked birds ever leave it.</li><li>No individual identity is tracked for non-target subjects, ever.</li><li>Nothing here describes when this household is occupied: the published location is randomized within 1 km of the station, and no uptime, health, or camera schedule is published. Times on this site are when a bird was seen or heard.</li>
+<li>Only birds are published. People, vehicles, and faces are never stored; wild mammals the nightly pass finds are kept in the station&#39;s private records and never appear here.</li><li>Raw video is a short rolling buffer. Only crops and short clips of detected birds and wild mammals are kept past it, and only bird crops are published.</li><li>No individual identity is tracked for non-target subjects, ever.</li><li>Nothing here describes when this household is occupied: the published location is randomized within 1 km of the station, and no uptime, health, or camera schedule is published. Times on this site are when a bird was seen or heard.</li>
 </ul>
 
 <h2>Reading the labels</h2>
@@ -44,21 +44,31 @@ a maybe; most single detections of an out-of-place species are classifier errors
 </ul>
 
 <h2>The hardware and software</h2>
-<p>Everything on this page comes from one machine at the station; nothing is uploaded to a cloud
-service or a third-party API at any stage. A single TP-Link Tapo C120 camera, about six feet from
-the feeder, supplies both the video and, from its built-in microphone, the audio: one device, no
-second camera.</p>
+<p>Two devices at the feeder collect the video and the audio, and all of the analysis runs on
+one computer at the station; nothing is uploaded to a cloud service or a third-party API for
+identification, and only the finished pages leave it. A TP-Link Tapo C120 camera, about six feet
+from the feeders, supplies the video. The audio comes from a dedicated microphone: a lavalier mic
+hanging in the open on the porch under a furry windscreen, wired to a Raspberry Pi 3 B+ in a
+weatherproof box that records it at 48 kHz through a USB sound adapter, filters out electrical
+hum, and streams it over Wi-Fi. The dedicated
+microphone replaced the camera's built-in one on September 13, 2026; the camera's audio is
+telephone quality (8 kHz), which cuts off much of the range songbirds sing in.</p>
 
 <p>Frigate watches the video stream and tracks birds with an exported D-FINE object detector
 running on an Nvidia RTX 3090, producing the crops and clips the rest of the pipeline works from.
+Each night a second pass runs the same detector over the day's motion-triggered recordings at full
+resolution to find birds the live pass missed, hummingbirds especially; its finds stay off this
+site until a person has checked them. The same nightly pass looks for wild mammals such as squirrels
+and chipmunks, which are kept for the station's own records and not published.
 BioCLIP 2, a fine-grained species classifier, and Frigate's own built-in classifier each get a
 vote on a crop, checked against a regional species list; a person's review can override either.
 BirdNET-Go listens to the audio independently and never sees the video. A local vision-language
 model, qwen3.8:27b served by Ollama, looks at the best crop of a visit to describe it and
-help settle disagreements between the other two, and separately writes the narrative editions on
-the Log page from the day's computed counts and timeline, nothing else. The database, the review
-dashboard, and this public site are all built by the same private project (Fieldstation) running
-on that same machine.</p>
+help settle disagreements between the other two. It also writes the recap on the Log page, once a
+day, shortly before the next morning's sunrise, from text only: the day's computed counts and
+timeline, the week before it for comparison, and the station's own log of changes such as feeder
+refills or new hardware. The database, the review dashboard, and this public site are all built by
+the same private project (Fieldstation) running on that same computer.</p>
 
 <p>The hourly weather is measured by a nearby station of the North Carolina ECONet; cloud cover,
 which it does not measure, comes from the Open-Meteo weather model. Weather data provided by the
@@ -74,7 +84,9 @@ titmouse that visits the feeder in silence is the reverse. A species with two hu
 heard and one seen tells you about the sensors, not the bird.</p>
 
 <p>The microphone first recorded a bird on September 7, 2026; the camera first recorded a visit on September 9, 2026. Days before the camera's first
-visit are audio only, and a jump in visits on that day is the hardware arriving, not the birds.</p>
+visit are audio only, and a jump in visits on that day is the hardware arriving, not the birds.
+The same goes for sound on September 13, 2026, when the dedicated microphone replaced the camera's: it
+records several times as many detections a day, so heard counts before and after that date do not compare.</p>
 
 <p><strong>Known failure modes.</strong> The acoustic classifier mistakes distant traffic, squirrels,
 insects and overlapping song for birds, and one loud call can score as two or three detections in
