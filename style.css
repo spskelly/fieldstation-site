@@ -126,6 +126,12 @@ ul.feed li a.pic img { width: 56px; height: 42px; }
 .records a.detail { font-size: .9rem; }
 .prose p, .prose li { max-width: 62rem; }
 .prose h2 { margin-top: 1.4rem; }
+.topology { margin: 1rem 0; }
+.topology svg { display: block; width: 100%; max-width: 440px; height: auto; color: var(--muted); }
+.topology rect { fill: var(--soft); stroke: var(--border); }
+.topology text { fill: var(--fg); font: 600 15px system-ui, -apple-system, "Segoe UI", sans-serif; text-anchor: middle; }
+.topology text.sub { fill: var(--muted); font-weight: 400; font-size: 13px; }
+.topology .links line { stroke: currentColor; stroke-width: 1.5; }
 ul.days li { display: flex; gap: .8rem; padding: .3rem 0; border-top: 1px solid var(--border); }
 ul.days li:first-child { border-top: 0; }
 ul.chips { display: flex; flex-wrap: wrap; gap: .4rem; }

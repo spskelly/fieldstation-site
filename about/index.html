@@ -44,9 +44,37 @@ a maybe; most single detections of an out-of-place species are classifier errors
 </ul>
 
 <h2>The hardware and software</h2>
-<p>Two devices at the feeder collect the video and the audio, and all of the analysis runs on
-one computer at the station; nothing is uploaded to a cloud service or a third-party API for
-identification, and only the finished pages leave it. A TP-Link Tapo C120 camera, about six feet
+<p>Two devices on the porch capture the video and the audio and send them over Wi-Fi to a
+workstation indoors, which does all of the identification. Nothing is uploaded to a cloud service
+or a third-party API along the way, and only the finished pages leave the house.</p>
+
+<figure class="topology">
+<svg viewBox="0 0 440 530" role="img" aria-labelledby="topology-title">
+<title id="topology-title">The camera streams video over Wi-Fi to the home network. The lavalier mic is wired to a Raspberry Pi, which streams the audio over Wi-Fi to the same network. The workstation receives both: its RTX 3090 GPU runs the Frigate detector and the vision model, and its CPU runs BirdNET-Go and BioCLIP 2.</title>
+<defs><marker id="topology-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+<g class="links" marker-end="url(#topology-arrow)">
+<line x1="110" y1="56" x2="110" y2="168"/>
+<line x1="330" y1="56" x2="330" y2="88"/>
+<line x1="330" y1="136" x2="330" y2="168"/>
+<line x1="110" y1="216" x2="168" y2="248"/>
+<line x1="330" y1="216" x2="272" y2="248"/>
+<line x1="220" y1="296" x2="220" y2="328"/>
+<line x1="170" y1="376" x2="112" y2="418"/>
+<line x1="270" y1="376" x2="328" y2="418"/>
+</g>
+<g class="node"><rect x="20" y="10" width="180" height="46" rx="8"/><text x="110" y="30">Tapo C120 camera</text><text class="sub" x="110" y="47">video</text></g>
+<g class="node"><rect x="240" y="10" width="180" height="46" rx="8"/><text x="330" y="30">Lavalier mic</text><text class="sub" x="330" y="47">under a windscreen</text></g>
+<g class="node"><rect x="240" y="90" width="180" height="46" rx="8"/><text x="330" y="110">Raspberry Pi 3 B+</text><text class="sub" x="330" y="127">48 kHz, hum filter</text></g>
+<g class="node"><rect x="20" y="170" width="180" height="46" rx="8"/><text x="110" y="198">Wi-Fi</text></g>
+<g class="node"><rect x="240" y="170" width="180" height="46" rx="8"/><text x="330" y="198">Wi-Fi</text></g>
+<g class="node"><rect x="120" y="250" width="200" height="46" rx="8"/><text x="220" y="278">Home network</text></g>
+<g class="node"><rect x="120" y="330" width="200" height="46" rx="8"/><text x="220" y="350">Workstation</text><text class="sub" x="220" y="367">database, review, this site</text></g>
+<g class="node"><rect x="20" y="420" width="180" height="100" rx="8"/><text x="110" y="446">GPU: RTX 3090</text><text class="sub" x="110" y="470">Frigate + D-FINE</text><text class="sub" x="110" y="490">qwen3.8:27b</text><text class="sub" x="110" y="508">(vision model)</text></g>
+<g class="node"><rect x="240" y="420" width="180" height="100" rx="8"/><text x="330" y="446">CPU</text><text class="sub" x="330" y="470">BirdNET-Go (audio)</text><text class="sub" x="330" y="490">BioCLIP 2 (species)</text></g>
+</svg>
+</figure>
+
+<p>A TP-Link Tapo C120 camera, about six feet
 from the feeders, supplies the video. The audio comes from a dedicated microphone: a lavalier mic
 hanging in the open on the porch under a furry windscreen, wired to a Raspberry Pi 3 B+ in a
 weatherproof box that records it at 48 kHz through a USB sound adapter, filters out electrical
@@ -68,7 +96,7 @@ help settle disagreements between the other two. It also writes the recap on the
 day, shortly before the next morning's sunrise, from text only: the day's computed counts and
 timeline, the week before it for comparison, and the station's own log of changes such as feeder
 refills or new hardware. The database, the review dashboard, and this public site are all built by
-the same private project (Fieldstation) running on that same computer.</p>
+the same private project (Fieldstation) running on that same workstation.</p>
 
 <p>The hourly weather is measured by a nearby station of the North Carolina ECONet; cloud cover,
 which it does not measure, comes from the Open-Meteo weather model. Weather data provided by the
