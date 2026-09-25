@@ -322,24 +322,51 @@
       stat(sp.days.length, sp.days.length === 1 ? "day recorded" : "days recorded"),
       stat(sp.last_date ? longDate(sp.last_date) : "–", "last record", "date")));
     app.append(hero);
-    app.append(el("section", { class: "card" }, el("h2", null, "Time of day"),
-      gridTable([{ slug: null, common: "All days", hours: sp.hourly_profile, seen: sp.total_seen, heard: sp.total_heard }], { header: "" })));
+    const records = sp.records || [];
+    const views = records.filter((r) => r.kind === "visit" && r.image);
+    if (views.length) app.append(el("section", { class: "card" }, el("h2", null, `Every view (${views.length})`), viewStrip(sp, views)));
+    // seen and heard get a row each, shaded against their own peak: camera
+    // visits and calls are not comparable counts (see gridTable)
+    const hourRow = (kind, common, total, image) => {
+      const hours = Array(24).fill(0);
+      for (const r of records) if (r.kind === kind) hours[parseInt(r.time.slice(0, 2), 10)] += 1;
+      return { slug: null, common, hours, image, seen: kind === "visit" ? total : 0, heard: kind === "audio" ? total : 0 };
+    };
+    const rows = [];
+    if (sp.total_seen) rows.push(hourRow("visit", "Seen", sp.total_seen, sp.best_image));
+    if (sp.total_heard) rows.push(hourRow("audio", "Heard", sp.total_heard, null));
+    app.append(el("section", { class: "card" }, el("h2", null, "Time of day"), gridTable(rows, { header: "" })));
     app.append(el("section", { class: "card" }, el("h2", null, "Every record"), recordList(sp)));
+  }
+
+  // Every crop of the species, newest first, in a sideways strip that snaps
+  // to each picture; the arrows page it for mouse users. Each crop opens the
+  // full image and its caption opens that day filtered to this species.
+  function viewStrip(sp, views) {
+    const strip = el("div", { class: "views", tabindex: "0", "aria-label": `Crops of ${sp.common}` });
+    for (const r of views)
+      strip.append(el("figure", null, picture(r.image, `${sp.common}, ${longDate(r.date)} ${r.time}`),
+        el("figcaption", null, el("a", { href: dayHref(r.date, sp.slug) }, `${longDate(r.date)} · ${r.time}`))));
+    const page = (dir, text, label) => {
+      const b = el("button", { type: "button", "aria-label": label, title: label }, text);
+      b.addEventListener("click", () => strip.scrollBy({ left: dir * strip.clientWidth * 0.9, behavior: "smooth" }));
+      return b;
+    };
+    return el("div", { class: "views-wrap" }, page(-1, "‹", "Newer"), strip, page(1, "›", "Older"));
   }
 
   // Every sighting and hearing, newest first, grouped by day. The day heading
   // and each row open that day filtered to this species; a crop opens the
-  // full image. Days after the third start collapsed.
+  // full image. Every day starts collapsed; the summary line carries the counts.
   function recordList(sp) {
     const records = sp.records || [];
     if (!records.length) return el("p", { class: "empty" }, "No records.");
     const byDay = new Map();
     for (const r of records) (byDay.get(r.date) || byDay.set(r.date, []).get(r.date)).push(r);
     const wrap = el("div", { class: "records" });
-    let n = 0;
     for (const [date, rows] of byDay) {
       const seen = rows.filter((r) => r.kind === "visit").length;
-      const details = el("details", n++ < 3 ? { open: "" } : {});
+      const details = el("details", null);
       details.append(el("summary", null, dayLink(date, null, sp.slug),
         el("span", { class: "detail" }, ` ${seen} seen · ${rows.length - seen} heard`)));
       const list = el("ul", { class: "feed" });

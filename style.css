@@ -120,8 +120,15 @@ a.pic { display: block; line-height: 0; }
 a.pic img { transition: opacity .15s; }
 a.pic:hover img { opacity: .85; }
 ul.feed li a.pic img { width: 56px; height: 42px; }
-.records details + details { margin-top: .8rem; border-top: 1px solid var(--border); padding-top: .6rem; }
-.records summary { cursor: pointer; font-weight: 600; margin-bottom: .3rem; }
+.records details + details { border-top: 1px solid var(--border); }
+.records summary { cursor: pointer; font-weight: 600; padding: .35rem 0; }
+.views-wrap { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .4rem; }
+.views-wrap > button { font: inherit; font-size: 1.4rem; line-height: 1; padding: .4rem .6rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--muted); cursor: pointer; }
+.views-wrap > button:hover { color: var(--accent); background: var(--soft); }
+.views { display: flex; gap: .6rem; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: .4rem; }
+.views figure { flex: 0 0 min(280px, 75vw); margin: 0; scroll-snap-align: start; }
+.views img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: var(--soft); }
+.views figcaption { font-size: .85rem; margin-top: .2rem; }
 .records summary .detail { font-weight: 400; color: var(--muted); }
 .records a.detail { font-size: .9rem; }
 .prose p, .prose li { max-width: 62rem; }
@@ -149,4 +156,6 @@ h2.section { margin-top: 1.6rem; }
   ul.feed li { grid-template-columns: 48px 6rem 1fr; }
   ul.feed .detail { grid-column: 3; }
   .hero { grid-template-columns: 1fr; }
+  .views-wrap { grid-template-columns: minmax(0, 1fr); }
+  .views-wrap > button { display: none; }
 }
