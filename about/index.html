@@ -69,7 +69,7 @@ or a third-party API along the way, and only the finished pages leave the house.
 <g class="node"><rect x="240" y="170" width="180" height="46" rx="8"/><text x="330" y="198">Wi-Fi</text></g>
 <g class="node"><rect x="120" y="250" width="200" height="46" rx="8"/><text x="220" y="278">Home network</text></g>
 <g class="node"><rect x="120" y="330" width="200" height="46" rx="8"/><text x="220" y="350">Workstation</text><text class="sub" x="220" y="367">database, review, this site</text></g>
-<g class="node"><rect x="20" y="420" width="180" height="100" rx="8"/><text x="110" y="446">GPU: RTX 3090</text><text class="sub" x="110" y="470">Frigate + D-FINE</text><text class="sub" x="110" y="490">qwen3.8:27b</text><text class="sub" x="110" y="508">(vision model)</text></g>
+<g class="node"><rect x="20" y="420" width="180" height="100" rx="8"/><text x="110" y="446">GPU: RTX 3090</text><text class="sub" x="110" y="470">Frigate + D-FINE</text><text class="sub" x="110" y="490">claude-haiku-5-5</text><text class="sub" x="110" y="508">(vision model)</text></g>
 <g class="node"><rect x="240" y="420" width="180" height="100" rx="8"/><text x="330" y="446">CPU</text><text class="sub" x="330" y="470">BirdNET-Go (audio)</text><text class="sub" x="330" y="490">BioCLIP 2 (species)</text></g>
 </svg>
 </figure>
@@ -91,7 +91,7 @@ and chipmunks, which are kept for the station's own records and not published.
 BioCLIP 2, a fine-grained species classifier, and Frigate's own built-in classifier each get a
 vote on a crop, checked against a regional species list; a person's review can override either.
 BirdNET-Go listens to the audio independently and never sees the video. A local vision-language
-model, qwen3.8:27b served by Ollama, looks at the best crop of a visit to describe it and
+model, claude-haiku-5-5 served by Ollama, looks at the best crop of a visit to describe it and
 help settle disagreements between the other two. It also writes the recap on the Log page, once a
 day, shortly before the next morning's sunrise, from text only: the day's computed counts and
 timeline, the week before it for comparison, and the station's own log of changes such as feeder
